@@ -1,0 +1,16 @@
+torch>=1.8.0
+transformers>=4.10.0
+datasets>=2.1.0
+evaluate>=0.2.2
+numpy>=1.19.5
+seqeval>=1.2.2
+
+[dev]
+pytest>=6.2
+black
+flake8
+isort
+
+[docs]
+mkdocs
+mkdocs-material

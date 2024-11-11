@@ -1,0 +1,2 @@
+[console_scripts]
+ner-multilingual = Named_Entity_Recognition_BERT_Multilingual_Library_LUX.cli:main
