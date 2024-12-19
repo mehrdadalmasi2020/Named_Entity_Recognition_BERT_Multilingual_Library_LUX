@@ -6,7 +6,7 @@ os.environ["TRANSFORMERS_NO_TF"] = "1"  # Disable TensorFlow
 
 setup(
     name='Named_Entity_Recognition_BERT_Multilingual_Library_LUX',
-    version='0.1.4',
+    version='0.1.14',
     description=(
         'A comprehensive multilingual Named Entity Recognition (NER) library leveraging BERT. '
         'Supports key information extraction tasks across various domains such as biomedical, environmental, and technological.'
@@ -15,11 +15,11 @@ setup(
     long_description_content_type='text/markdown',
     author="Mehrdad ALMASI, Demival VASQUES FILHO, Tugce KARATAS",
     author_email="mehrdad.al.2023@gmail.com, demival.vasques@uni.lu, tugce.karatas@uni.lu",
-    url='https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX',
+    url='https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX',
     project_urls={
-        "Documentation": "https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/wiki",
-        "Source": "https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX",
-        "Tracker": "https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/issues",
+        "Documentation": "https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/wiki",
+        "Source": "https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX",
+        "Tracker": "https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/issues",
     },
     packages=find_packages(include=['Named_Entity_Recognition_BERT_Multilingual_Library_LUX', 'Named_Entity_Recognition_BERT_Multilingual_Library_LUX.*']),
     install_requires=[

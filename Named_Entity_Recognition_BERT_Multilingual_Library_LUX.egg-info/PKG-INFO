@@ -1,13 +1,13 @@
 Metadata-Version: 2.1
 Name: Named_Entity_Recognition_BERT_Multilingual_Library_LUX
-Version: 0.1.4
+Version: 0.1.14
 Summary: A comprehensive multilingual Named Entity Recognition (NER) library leveraging BERT. Supports key information extraction tasks across various domains such as biomedical, environmental, and technological.
-Home-page: https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX
+Home-page: https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX
 Author: Mehrdad ALMASI, Demival VASQUES FILHO, Tugce KARATAS
 Author-email: mehrdad.al.2023@gmail.com, demival.vasques@uni.lu, tugce.karatas@uni.lu
-Project-URL: Documentation, https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/wiki
-Project-URL: Source, https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX
-Project-URL: Tracker, https://github.com/yourusername/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/issues
+Project-URL: Documentation, https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/wiki
+Project-URL: Source, https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX
+Project-URL: Tracker, https://github.com/mehrdadalmasi2020/Named_Entity_Recognition_BERT_Multilingual_Library_LUX/issues
 Keywords: Named Entity Recognition,BERT,Multilingual NLP,Information Extraction,NER,Key Information Extraction
 Classifier: Development Status :: 4 - Beta
 Classifier: Intended Audience :: Developers
@@ -79,7 +79,7 @@ Here is a complete example of how to use the library for training and predicting
 from Named_Entity_Recognition_BERT_Multilingual_Library_LUX import NERPipeline
 
 # Initialize pipeline
-pipeline = NERPipeline(pretrained_model="bert-base-cased")
+pipeline = NERPipeline(pretrained_model="bert-base-multilingual-cased")
 
 # Prepare data
 train_dataset, val_dataset, test_dataset = pipeline.prepare_data(
@@ -88,11 +88,15 @@ train_dataset, val_dataset, test_dataset = pipeline.prepare_data(
     "./bc2gm-corpus/conll/test.tsv"
 )
 
+
 # Initialize model
 pipeline.initialize_model(num_labels=len(pipeline.label_list))
 
 # Train the model
-pipeline.train(train_dataset, val_dataset)
+pipeline.train(train_dataset, val_dataset,output_dir="/kaggle/temp/bio_ner_results/")
+
+# Load the model after training
+pipeline.load_model(model_dir="/kaggle/temp/bio_ner_results/best_model/")
 
 # Test the model
 test_metrics = pipeline.test(test_dataset)
@@ -103,7 +107,7 @@ predictions = pipeline.predict("BRCA1 is a gene associated with breast cancer.")
 print("\nPredictions on New Sentence:")
 for token, label in predictions:
     print(f"{token} | {label}")
-	
+
 ```
 
 ## CoNLL Data Format

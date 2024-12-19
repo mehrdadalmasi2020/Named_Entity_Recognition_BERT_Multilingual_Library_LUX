@@ -12,7 +12,7 @@ import evaluate
 
 
 class NERPipeline:
-    def __init__(self, pretrained_model="bert-base-cased"):
+    def __init__(self, pretrained_model="bert-base-multilingual-cased"):
         self.pretrained_model = pretrained_model
         self.tokenizer = BertTokenizerFast.from_pretrained(self.pretrained_model)
         self.metric = evaluate.load("seqeval")
@@ -21,6 +21,12 @@ class NERPipeline:
         self.id_to_label = None
         self.model = None
 
+    def load_model(self, model_dir="./bio_ner_results/best_model"):
+        self.model = BertForTokenClassification.from_pretrained(model_dir, use_safetensors=True)
+        self.tokenizer = BertTokenizerFast.from_pretrained(model_dir)
+        print(f"Model loaded from: {model_dir}")
+
+        
     def load_data(self, file_path):
         sentences, labels = [], []
         current_sentence, current_labels = [], []
@@ -58,7 +64,6 @@ class NERPipeline:
         val_dataset = convert_to_hf_format(val_sentences, val_labels)
         test_dataset = convert_to_hf_format(test_sentences, test_labels)
 
-        # Tokenization and alignment
         train_dataset = train_dataset.map(self.tokenize_and_align_labels, batched=True, remove_columns=["tokens", "ner_tags"])
         val_dataset = val_dataset.map(self.tokenize_and_align_labels, batched=True, remove_columns=["tokens", "ner_tags"])
         test_dataset = test_dataset.map(self.tokenize_and_align_labels, batched=True, remove_columns=["tokens", "ner_tags"])
@@ -66,12 +71,11 @@ class NERPipeline:
         return train_dataset, val_dataset, test_dataset
 
     def tokenize_and_align_labels(self, examples):
-        # Tokenize the input and align the labels with tokenized words
         tokenized_inputs = self.tokenizer(
             examples["tokens"],
             padding=True,
             truncation=True,
-            max_length=128,  # Ensure consistent input length
+            max_length=128,  
             is_split_into_words=True
         )
         
@@ -82,11 +86,11 @@ class NERPipeline:
             previous_word_idx = None
             for word_idx in word_ids:
                 if word_idx is None:
-                    label_ids.append(-100)  # Padding token, ignored by loss
+                    label_ids.append(-100)  
                 elif word_idx != previous_word_idx:
-                    label_ids.append(label[word_idx])  # Assign label to first sub-token
+                    label_ids.append(label[word_idx])
                 else:
-                    label_ids.append(-100)  # Ignore other sub-tokens
+                    label_ids.append(-100)  
                 previous_word_idx = word_idx
             labels.append(label_ids)
         tokenized_inputs["labels"] = labels
@@ -120,7 +124,7 @@ class NERPipeline:
 
         training_args = TrainingArguments(
             output_dir=output_dir,
-            evaluation_strategy="epoch",  # Updated from `eval_strategy` to `evaluation_strategy`
+            evaluation_strategy="epoch",
             learning_rate=2e-5,
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
@@ -128,7 +132,7 @@ class NERPipeline:
             weight_decay=0.01,
             report_to="none",
             logging_dir="./logs",
-            logging_steps=10,
+            logging_steps=10000,
             remove_unused_columns=False,
         )
 
@@ -146,6 +150,13 @@ class NERPipeline:
 
         trainer.train()
 
+        # Save model and tokenizer
+        model_save_path = f"{output_dir}/best_model"
+        self.model.save_pretrained(model_save_path)
+        self.tokenizer.save_pretrained(model_save_path)  # Save tokenizer here
+        print(f"Model and tokenizer saved at: {model_save_path}")
+
+
     def predict(self, sentence):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(device)
@@ -159,7 +170,6 @@ class NERPipeline:
         return list(zip(tokens, predicted_labels))
 
     def test(self, test_dataset):
-        """Evaluate the model on the test dataset."""
         trainer = Trainer(
             model=self.model,
             tokenizer=self.tokenizer,
@@ -171,12 +181,10 @@ class NERPipeline:
             ),
         )
 
-        # Predictions
         results = trainer.predict(test_dataset)
         logits = results.predictions
         labels = results.label_ids
 
-        # Align predictions and labels
         predictions = np.argmax(logits, axis=2)
         true_labels = [[self.label_list[l] for l in label if l != -100] for label in labels]
         true_predictions = [
@@ -184,12 +192,5 @@ class NERPipeline:
             for prediction, label in zip(predictions, labels)
         ]
 
-        # Calculate metrics
         metrics = self.metric.compute(predictions=true_predictions, references=true_labels)
-
-        print("\nTest Set Evaluation Metrics:")
-        print(f"Precision: {metrics['overall_precision']:.4f}")
-        print(f"Recall: {metrics['overall_recall']:.4f}")
-        print(f"F1 Score: {metrics['overall_f1']:.4f}")
-        print(f"Accuracy: {metrics['overall_accuracy']:.4f}")
         return metrics

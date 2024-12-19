@@ -41,7 +41,7 @@ Here is a complete example of how to use the library for training and predicting
 from Named_Entity_Recognition_BERT_Multilingual_Library_LUX import NERPipeline
 
 # Initialize pipeline
-pipeline = NERPipeline(pretrained_model="bert-base-cased")
+pipeline = NERPipeline(pretrained_model="bert-base-multilingual-cased")
 
 # Prepare data
 train_dataset, val_dataset, test_dataset = pipeline.prepare_data(
@@ -50,11 +50,15 @@ train_dataset, val_dataset, test_dataset = pipeline.prepare_data(
     "./bc2gm-corpus/conll/test.tsv"
 )
 
+
 # Initialize model
 pipeline.initialize_model(num_labels=len(pipeline.label_list))
 
 # Train the model
-pipeline.train(train_dataset, val_dataset)
+pipeline.train(train_dataset, val_dataset,output_dir="/kaggle/temp/bio_ner_results/")
+
+# Load the model after training
+pipeline.load_model(model_dir="/kaggle/temp/bio_ner_results/best_model/")
 
 # Test the model
 test_metrics = pipeline.test(test_dataset)
@@ -65,7 +69,7 @@ predictions = pipeline.predict("BRCA1 is a gene associated with breast cancer.")
 print("\nPredictions on New Sentence:")
 for token, label in predictions:
     print(f"{token} | {label}")
-	
+
 ```
 
 ## CoNLL Data Format
